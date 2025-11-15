@@ -25,6 +25,16 @@ router.get('/stats/summary', async (req, res) => {
     );
     const totalRevenue = Number(entriesAgg.rows[0]?.total_revenue || 0);
     const totalPieces  = Number(entriesAgg.rows[0]?.total_pieces || 0);
+        // Total cost from order_days (what YOU spent)
+    const costResult = await db.query(
+      `SELECT COALESCE(SUM(actual_spent_ils), 0) AS total_cost
+      FROM order_days`
+    );
+    const totalCost = Number(costResult.rows[0]?.total_cost || 0);
+
+    // Profit = revenue - cost
+    const totalProfit = totalRevenue - totalCost;
+    const avgProfitPerDay = totalDays > 0 ? totalProfit / totalDays : 0;
 
     // Unpaid amounts from entries
     const unpaidAgg = await db.query(
@@ -86,6 +96,9 @@ router.get('/stats/summary', async (req, res) => {
       total_unpaid_amount: totalUnpaidAmount,
       total_unpaid_orders: totalUnpaidOrders,
       total_customers: totalCustomers,
+      total_cost: totalCost,
+      total_profit: totalProfit,
+      avg_profit_per_day: avgProfitPerDay,
       top_customers: topCustomers,
       daily_revenue: dailyRevenue,
     });

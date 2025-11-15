@@ -155,12 +155,21 @@ async function fetchOrderDays() {
     for (const day of days) {
       const tr = document.createElement('tr');
 
-      const totalIls = Number(day.total_ils || 0).toFixed(2);
-      const actualSpent = Number(day.actual_spent_ils || 0).toFixed(2);
+      const total = Number(day.total_ils || 0);
+      const spent = Number(day.actual_spent_ils || 0);
+      const profit = total - spent;
+
+      const totalIls = total.toFixed(2);
+      const actualSpent = spent.toFixed(2);
+      const profitStr = profit.toFixed(2);
+
       const createdAt = day.created_at
         ? new Date(day.created_at).toLocaleString('ar-EG')
         : '';
       const dateOnly = formatDateOnly(day.order_date);
+
+      // optional: color class for profit
+      const profitClass = profit >= 0 ? 'green' : 'red';
 
       tr.innerHTML = `
         <td>${dateOnly}</td>
@@ -169,6 +178,9 @@ async function fetchOrderDays() {
         <td>${createdAt}</td>
         <td class="text-left">₪${totalIls}</td>
         <td class="text-left">₪${actualSpent}</td>
+        <td class="text-left">
+          <span class="badge ${profitClass}">₪${profitStr}</span>
+        </td>
         <td>
           <span class="badge green">${day.picked_up_count} استلموا</span>
           <span class="badge red">${day.paid_count} دافعين</span>
@@ -182,6 +194,7 @@ async function fetchOrderDays() {
 
       daysTableBody.appendChild(tr);
     }
+
   } catch (err) {
     console.error(err);
     createDayMessage.textContent = 'حدث خطأ أثناء تحميل الأيام.';

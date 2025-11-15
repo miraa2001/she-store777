@@ -111,30 +111,49 @@ async function loadStats() {
 }
 
 function renderSummaryCards(stats) {
+  const totalRevenue = Number(stats.total_revenue || 0);
+  const totalCost = Number(stats.total_cost || 0);
+  const totalProfit = Number(stats.total_profit || 0);
+  const avgProfitPerDay = Number(stats.avg_profit_per_day || 0);
+  const unpaidAmount = Number(stats.total_unpaid_amount || 0);
+
+  const profitClass = totalProfit >= 0 ? 'profit-positive' : 'profit-negative';
+
   summaryCardsEl.innerHTML = `
     <div class="card">
-      <h3>Total Revenue</h3>
-      <div class="big-number">₪${stats.total_revenue.toFixed(2)}</div>
+      <h3>إجمالي المبيعات</h3>
+      <div class="big-number">₪${totalRevenue.toFixed(2)}</div>
     </div>
 
     <div class="card">
-      <h3>Total Pieces</h3>
+      <h3>إجمالي المصروف</h3>
+      <div class="big-number">₪${totalCost.toFixed(2)}</div>
+    </div>
+
+    <div class="card">
+      <h3>صافي الربح</h3>
+      <div class="big-number ${profitClass}">₪${totalProfit.toFixed(2)}</div>
+      <div class="sub">متوسط الربح لليوم: ₪${avgProfitPerDay.toFixed(2)}</div>
+    </div>
+
+    <div class="card">
+      <h3>إجمالي القطع</h3>
       <div class="big-number">${stats.total_pieces}</div>
     </div>
 
     <div class="card">
-      <h3>Unpaid Amount</h3>
-      <div class="big-number">₪${stats.total_unpaid_amount.toFixed(2)}</div>
-      <div class="sub">${stats.total_unpaid_orders} orders</div>
+      <h3>غير مدفوع</h3>
+      <div class="big-number">₪${unpaidAmount.toFixed(2)}</div>
+      <div class="sub">${stats.total_unpaid_orders} طلب</div>
     </div>
 
     <div class="card">
-      <h3>Unique Customers</h3>
+      <h3>عدد العملاء المميزين</h3>
       <div class="big-number">${stats.total_customers}</div>
     </div>
 
     <div class="card">
-      <h3>Total Days</h3>
+      <h3>عدد الأيام</h3>
       <div class="big-number">${stats.total_days}</div>
     </div>
   `;

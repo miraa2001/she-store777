@@ -93,6 +93,7 @@ const summaryNeedsChangeEl = document.getElementById('summaryNeedsChange');
 
 const actualSpentInput = document.getElementById('actualSpentInput');
 const saveActualSpentBtn = document.getElementById('saveActualSpentBtn');
+const summaryProfitEl = document.getElementById('summaryProfit');
 
 const searchInput = document.getElementById('searchInput');
 const filterNotPicked = document.getElementById('filterNotPicked');
@@ -163,6 +164,9 @@ async function loadDay() {
     currentDay = day;
 
     const dStr = formatDateOnly(day.order_date);
+    const total = Number(day.total_ils || 0);
+    const spent = Number(day.actual_spent_ils || 0);
+    const profit = total - spent;
 
     dayTitleEl.textContent = day.title || `يوم رقم ${day.id}`;
     daySubtitleEl.textContent = `التاريخ: ${dStr}`;
@@ -174,6 +178,16 @@ async function loadDay() {
     if (actualSpentInput) {
       actualSpentInput.value = Number(day.actual_spent_ils || 0).toFixed(2);
     }
+    if (summaryProfitEl) {
+      summaryProfitEl.textContent = `₪${profit.toFixed(2)}`;
+      summaryProfitEl.classList.remove('profit-positive', 'profit-negative', 'profit-neutral');
+      summaryProfitEl.classList.add(
+        profit > 0 ? 'profit-positive'
+        : profit < 0 ? 'profit-negative'
+        : 'profit-neutral'
+      );
+    }
+    
   } catch (err) {
     console.error(err);
     entriesMessage.textContent = 'حدث خطأ أثناء تحميل تفاصيل اليوم.';
