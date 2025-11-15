@@ -11,8 +11,16 @@ const loginError = document.getElementById('loginError');
 // إذا فيه توكن موجود أصلاً، دخليه مباشرة على الداشبورد
 const existingToken = localStorage.getItem(TOKEN_KEY);
 if (existingToken) {
-  window.location.href = 'index.html';
+  window.location.replace('index.html');
 }
+// لو رجعنا للصفحة عن طريق Back وفيه توكن، رجّعيه للدashboard
+window.addEventListener('pageshow', () => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) {
+    window.location.replace('index.html');
+  }
+});
+
 
 async function handleLogin() {
   loginError.textContent = '';
@@ -47,7 +55,7 @@ async function handleLogin() {
     localStorage.setItem(USER_KEY, JSON.stringify(data.user));
 
     // تحويل للداشبورد
-    window.location.href = 'index.html';
+    window.location.replace('index.html');
   } catch (err) {
     console.error(err);
     loginError.textContent = 'حدث خطأ غير متوقع.';

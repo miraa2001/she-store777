@@ -17,6 +17,35 @@ function getAuthHeaders() {
   }
 })();
 
+const currentUserLabel = document.getElementById('currentUserLabel');
+const logoutBtn = document.getElementById('logoutBtn');
+
+function initUserHeader() {
+  const userJson = localStorage.getItem(USER_KEY);
+  if (!userJson) {
+    if (currentUserLabel) currentUserLabel.textContent = '';
+    return;
+  }
+
+  try {
+    const user = JSON.parse(userJson);
+    if (currentUserLabel && user?.username) {
+      currentUserLabel.textContent = `مرحباً، ${user.username}`;
+    }
+  } catch (e) {
+    console.error('Failed to parse user from storage', e);
+  }
+}
+
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    window.location.href = 'login.html';
+  });
+}
+
+
 const THEME_KEY = 'she_store_theme';
 const themeToggleBtn = document.getElementById('themeToggle');
 
@@ -47,6 +76,7 @@ if (themeToggleBtn) {
 
 // تفعيل الثيم عند تحميل الصفحة
 initTheme();
+initUserHeader();
 
 const orderDateInput = document.getElementById('orderDate');
 const orderTitleInput = document.getElementById('orderTitle');

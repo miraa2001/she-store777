@@ -167,6 +167,20 @@
     .ghost-btn:hover {
       background: #f0f0f0;
     }
+        .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .user-label {
+      font-size: 13px;
+      color: #666;
+    }
+
+    body.dark .user-label {
+      color: #ddd;
+    }
 
     /* 🌙 Dark mode */
 
@@ -258,10 +272,15 @@
   <div class="container">
     <div class="top-bar">
       <a href="index.html" class="back-link">← الرجوع لكل الأيام</a>
-      <button id="themeToggle" class="ghost-btn">🌙 الوضع الداكن</button>
+      <div class="top-actions">
+        <span id="currentUserLabel" class="user-label"></span>
+        <button id="logoutBtn" class="ghost-btn">تسجيل الخروج</button>
+        <button id="themeToggle" class="ghost-btn">🌙 الوضع الداكن</button>
+      </div>
     </div>
 
     <h1 id="dayTitle">اليوم</h1>
+
     <p id="daySubtitle" style="color:#666;font-size:13px;"></p>
 
     <div class="card">
