@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>شي ستور - تفاصيل اليوم</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin-bottom: 0.25rem;
+    }
+    a.back-link {
+      display: inline-block;
+      margin-bottom: 0.5rem;
+      font-size: 14px;
+      text-decoration: none;
+      color: #555;
+    }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+      gap: 0.5rem;
+      font-size: 14px;
+    }
+    .summary-item {
+      background:#fafafa;
+      border-radius:8px;
+      padding:0.5rem 0.75rem;
+    }
+    .summary-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color:#777;
+    }
+    .summary-value {
+      font-size: 16px;
+      font-weight:600;
+    }
+    .filters {
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.5rem;
+      align-items:center;
+      margin-top:0.5rem;
+    }
+    .filters input[type="text"] {
+      padding:0.3rem 0.4rem;
+      border-radius:6px;
+      border:1px solid #ccc;
+      min-width: 180px;
+    }
+    label {
+      font-size: 13px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 13px;
+      direction: rtl;
+    }
+    th, td {
+      padding: 0.4rem;
+      border-bottom: 1px solid #eee;
+      text-align: right;
+    }
+    th {
+      background: #fafafa;
+      font-weight: 600;
+    }
+    tr:hover {
+      background:#f9f9f9;
+    }
+    td.editable {
+      cursor: pointer;
+    }
+    input.inline-input, textarea.inline-input {
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 13px;
+      padding: 0.2rem;
+    }
+    .checkbox-cell {
+      text-align:center;
+    }
+    .totals-row {
+      font-weight: 600;
+      background:#f0f0f0;
+    }
+    button {
+      font-family: inherit;
+      font-size: 13px;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+    button.primary {
+      background:#222;
+      color:#fff;
+    }
+    button.danger {
+      background:#c0392b;
+      color:#fff;
+    }
+    button.secondary {
+      background:#f0f0f0;
+      color:#333;
+      border:1px solid #ccc;
+    }
+    .form-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:0.5rem;
+      margin-top:0.5rem;
+      align-items:flex-end;
+      font-size:13px;
+    }
+    .form-group {
+      flex:1;
+      min-width:120px;
+    }
+    .form-group input,
+    .form-group textarea {
+      width:100%;
+      box-sizing:border-box;
+      padding:0.3rem;
+      font-size:13px;
+      border-radius:6px;
+      border:1px solid #ccc;
+      resize: vertical;
+    }
+        .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .ghost-btn {
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid #ccc;
+      background: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .ghost-btn:hover {
+      background: #f0f0f0;
+    }
+
+    /* 🌙 Dark mode */
+
+    body.dark {
+      background: #111;
+      color: #f5f5f5;
+    }
+
+    body.dark .card {
+      background: #1c1c1c;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    }
+
+    body.dark h1,
+    body.dark h2,
+    body.dark h3,
+    body.dark label,
+    body.dark p,
+    body.dark .summary-label,
+        body.dark .summary-item {
+      background: #222;           /* darker card */
+      border: 1px solid #44444400;
+    }
+
+    body.dark .summary-label {
+      color: #bbbbbb;             /* softer gray */
+    }
+
+    body.dark .summary-value {
+      color: #ffffff;             /* bright white */
+    }
+
+    body.dark #daySubtitle {
+      color: #cccccc !important;  /* that date under the title */
+    }
+
+    body.dark .summary-value {
+      color: #f5f5f5;
+    }
+
+    body.dark table {
+      background: #1c1c1c;
+    }
+
+    body.dark th {
+      background: #222;
+      color: #f5f5f5;
+    }
+
+    body.dark tr:hover {
+      background: #222;
+    }
+
+    body.dark input,
+    body.dark textarea {
+      background: #111;
+      color: #f5f5f5;
+      border-color: #555;
+    }
+
+    body.dark button.primary {
+      background: #f5f5f5;
+      color: #111;
+    }
+
+    body.dark button.danger {
+      background: #e74c3c;
+      color: #fff;
+    }
+
+    body.dark button.secondary {
+      background: #333;
+      color: #f5f5f5;
+      border-color: #666;
+    }
+
+    @media (max-width: 700px) {
+      table {
+        font-size: 12px;
+      }
+      th:nth-child(7),
+      td:nth-child(7) {
+        display:none; /* إخفاء ملاحظات على الشاشات الصغيرة */
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <a href="index.html" class="back-link">← الرجوع لكل الأيام</a>
+      <button id="themeToggle" class="ghost-btn">🌙 الوضع الداكن</button>
+    </div>
+
+    <h1 id="dayTitle">اليوم</h1>
+    <p id="daySubtitle" style="color:#666;font-size:13px;"></p>
+
+    <div class="card">
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">التاريخ</div>
+          <div class="summary-value" id="summaryDate">–</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">إجمالي القطع</div>
+          <div class="summary-value" id="summaryQty">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">إجمالي المبلغ</div>
+          <div class="summary-value" id="summaryTotal">₪0.00</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">عدد المستلمين</div>
+          <div class="summary-value" id="summaryPicked">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">عدد الدافعين</div>
+          <div class="summary-value" id="summaryPaid">0</div>
+        </div>
+                <div class="summary-item">
+          <div class="summary-label">عدد غير الدافعين</div>
+          <div class="summary-value" id="summaryUnpaidCount">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">المبلغ غير المدفوع</div>
+          <div class="summary-value" id="summaryUnpaidAmount">₪0.00</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">عدد يحتاج فكة</div>
+          <div class="summary-value" id="summaryNeedsChange">0</div>
+        </div>
+      </div>
+
+      <div class="filters">
+        <input type="text" id="searchInput" placeholder="ابحثي بالاسم داخل هذا اليوم..." />
+        <label><input type="checkbox" id="filterNotPicked" /> عرض غير المستلمين فقط</label>
+        <label><input type="checkbox" id="filterNotPaid" /> عرض غير الدافعين فقط</label>
+      </div>
+    </div>
+        <div class="filters" style="margin-top:0.75rem;">
+        <button class="secondary" id="exportCsvBtn">تصدير CSV</button>
+        <button class="secondary" id="exportPdfBtn">تصدير PDF</button>
+    </div>
+
+    <div class="card">
+      <h2>الطلبـات لهذا اليوم</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>القطع</th>
+            <th>الإجمالي (₪)</th>
+            <th class="checkbox-cell">استلم</th>
+            <th class="checkbox-cell">دفع</th>
+            <th class="checkbox-cell">يحتاج فكة</th>
+            <th>ملاحظات</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="entriesBody">
+          <!-- rows go here -->
+        </tbody>
+        <tfoot>
+          <tr class="totals-row">
+            <td>الإجمالي</td>
+            <td id="totalsQty">0</td>
+            <td id="totalsTotal">₪0.00</td>
+            <td colspan="5"></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <h3 style="margin-top:1rem;">إضافة سطر جديد</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="newName">الاسم</label>
+          <input id="newName" type="text" />
+        </div>
+        <div class="form-group">
+          <label for="newQty">القطع</label>
+          <input id="newQty" type="number" min="0" value="0" />
+        </div>
+        <div class="form-group">
+          <label for="newTotal">الإجمالي (₪)</label>
+          <input id="newTotal" type="number" min="0" step="0.01" value="0" />
+        </div>
+        <div class="form-group">
+          <label for="newNotes">ملاحظات</label>
+          <input id="newNotes" type="text" />
+        </div>
+        <div>
+          <button class="primary" id="addEntryBtn">إضافة</button>
+        </div>
+      </div>
+
+      <p id="entriesMessage" style="color:red;font-size:13px;margin-top:0.5rem;"></p>
+    </div>
+  </div>
+
+  <script src="js/day.js"></script>
+</body>
+</html>

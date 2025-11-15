@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>شي ستور - الطلبات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #f5f5f5;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+
+    input, button {
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: #222;
+      color: #fff;
+    }
+
+    button.primary:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 14px;
+      direction: rtl;
+    }
+
+    th, td {
+      padding: 0.5rem;
+      border-bottom: 1px solid #eee;
+      text-align: right;
+    }
+
+    th {
+      background: #fafafa;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: #f9f9f9;
+    }
+
+    .text-left {
+      text-align: left;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #eee;
+    }
+
+    .badge.green { background: #c8f7c5; }
+    .badge.red { background: #ffd0d0; }
+        .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .ghost-btn {
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid #ccc;
+      background: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .ghost-btn:hover {
+      background: #f0f0f0;
+    }
+        .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .user-label {
+      font-size: 13px;
+      color: #666;
+    }
+
+    body.dark .user-label {
+      color: #ddd;
+    }
+
+    /* 🌙 Dark mode */
+
+    body.dark {
+      background: #111;
+      color: #f5f5f5;
+    }
+
+    body.dark .card {
+      background: #1c1c1c;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    }
+
+    body.dark h1,
+    body.dark h2,
+    body.dark label,
+    body.dark p {
+      color: #f5f5f5;
+    }
+
+    body.dark table {
+      background: #1c1c1c;
+    }
+
+    body.dark th {
+      background: #222;
+      color: #f5f5f5;
+    }
+
+    body.dark tr:hover {
+      background: #222;
+    }
+
+    body.dark input {
+      background: #111;
+      color: #f5f5f5;
+      border-color: #555;
+    }
+
+    body.dark button.primary {
+      background: #f5f5f5;
+      color: #111;
+    }
+
+    body.dark .ghost-btn {
+      background: #111;
+      color: #f5f5f5;
+      border-color: #666;
+    }
+
+    body.dark .badge {
+      background: #333;
+    }
+
+    body.dark .badge.green { background: #1f5c2e; }
+    body.dark .badge.red { background: #7f2a2a; }
+
+    @media (max-width: 600px) {
+      th:nth-child(4),
+      td:nth-child(4) {
+        display: none; /* إخفاء تاريخ الإنشاء على الشاشات الصغيرة */
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+        <div class="top-bar">
+      <h1>شي ستور – أيام الطلبات</h1>
+      <div class="top-actions">
+        <span id="currentUserLabel" class="user-label"></span>
+        <button id="logoutBtn" class="ghost-btn">تسجيل الخروج</button>
+        <button id="themeToggle" class="ghost-btn">🌙 الوضع الداكن</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>إضافة طلب جديد</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="orderDate">تاريخ الطلب</label>
+          <input type="date" id="orderDate" />
+        </div>
+        <div class="form-group">
+          <label for="orderTitle">عنوان (اختياري)</label>
+          <input type="text" id="orderTitle" placeholder="أضف طلب جديد" />
+        </div>
+        <div>
+          <button class="primary" id="createDayBtn">إضافة</button>
+        </div>
+      </div>
+      <p id="createDayMessage" style="color: red; font-size: 13px; margin-top: 0.5rem;"></p>
+    </div>
+
+    <div class="card">
+      <h2>كل الأيام</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>التاريخ</th>
+            <th>العنوان</th>
+            <th>إجمالي القطع</th>
+            <th>تاريخ الإنشاء</th>
+            <th class="text-left">الإجمالي (₪)</th>
+            <th>الاستلام / الدفع</th>
+            <th>فتح</th>
+          </tr>
+        </thead>
+        <tbody id="daysTableBody">
+          <!-- filled by JS -->
+        </tbody>
+      </table>
+      <p id="noDaysMsg" style="font-size: 13px; color:#666; margin-top:0.5rem; display:none;">
+        لا يوجد أيام طلبات حتى الآن. أضيفي أول يوم من الأعلى.
+      </p>
+    </div>
+  </div>
+
+  <script src="js/index.js"></script>
+</body>
+</html>
