@@ -4,6 +4,7 @@ const path = require('path');
 const orderDayRoutes = require('./routes/orderDayRoutes');
 const orderEntriesRoutes = require('./routes/orderEntryRoutes');
 const healthRoutes = require('./routes/healthRoutes');
+const statsRoutes = require('./routes/statsRoutes');
 const authRoutes = require('./routes/authRoutes');
 const authMiddleware = require('./middleware/authMiddleware');
 
@@ -19,5 +20,5 @@ app.use('/api', authRoutes);
 // 🔒 Protected routes (must have valid JWT)
 app.use('/api', authMiddleware, orderDayRoutes);
 app.use('/api', authMiddleware, orderEntriesRoutes);
-
+app.use('/api', authMiddleware, statsRoutes);
 module.exports = app;

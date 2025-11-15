@@ -84,21 +84,40 @@ const createDayBtn = document.getElementById('createDayBtn');
 const createDayMessage = document.getElementById('createDayMessage');
 const daysTableBody = document.getElementById('daysTableBody');
 const noDaysMsg = document.getElementById('noDaysMsg');
+const orderActualSpentInput = document.getElementById('orderActualSpent');
 
 // التاريخ الافتراضي = اليوم
 const today = new Date().toISOString().slice(0, 10);
 orderDateInput.value = today;
 
 function formatDateOnly(value) {
-  // if it's like "2025-11-13T22:00:00.000Z" -> slice first 10 chars
   if (!value) return '';
-  if (value.length >= 10) return value.slice(0, 10);
+
+  // If it's a string that looks like a date/time, try to parse it
+  try {
+    const d = new Date(value);
+    if (!isNaN(d.getTime())) {
+      // en-CA gives YYYY-MM-DD (nice for your UI)
+      return d.toLocaleDateString('en-CA');
+    }
+  } catch (e) {
+    // ignore and fall back
+  }
+
+  // Fallback: original behavior (just in case)
+  if (typeof value === 'string' && value.length >= 10) {
+    return value.slice(0, 10);
+  }
+
   return value;
 }
+
 
 async function fetchOrderDays() {
   try {
     const res = await fetch(`${API_BASE}/order-days`, {
+      method: 'GET',
+      cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
         ...getAuthHeaders()
@@ -106,14 +125,21 @@ async function fetchOrderDays() {
     });
 
     if (res.status === 401) {
-      // التوكن بايظة / منتهية
+      // token invalid/expired
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
       window.location.href = 'login.html';
       return;
     }
 
-    if (!res.ok) throw new Error('فشل في تحميل الأيام');
+    // If the server replies "not modified", just keep existing table without error
+    if (res.status === 304) {
+      return;
+    }
+
+    if (!res.ok) {
+      throw new Error('فشل في تحميل الأيام');
+    }
 
     const days = await res.json();
 
@@ -130,7 +156,10 @@ async function fetchOrderDays() {
       const tr = document.createElement('tr');
 
       const totalIls = Number(day.total_ils || 0).toFixed(2);
-      const createdAt = new Date(day.created_at).toLocaleString('ar-EG');
+      const actualSpent = Number(day.actual_spent_ils || 0).toFixed(2);
+      const createdAt = day.created_at
+        ? new Date(day.created_at).toLocaleString('ar-EG')
+        : '';
       const dateOnly = formatDateOnly(day.order_date);
 
       tr.innerHTML = `
@@ -139,6 +168,7 @@ async function fetchOrderDays() {
         <td>${day.total_quantity}</td>
         <td>${createdAt}</td>
         <td class="text-left">₪${totalIls}</td>
+        <td class="text-left">₪${actualSpent}</td>
         <td>
           <span class="badge green">${day.picked_up_count} استلموا</span>
           <span class="badge red">${day.paid_count} دافعين</span>
@@ -158,11 +188,13 @@ async function fetchOrderDays() {
   }
 }
 
+
 async function createOrderDay() {
   createDayMessage.textContent = '';
 
   const orderDate = orderDateInput.value;
   const title = orderTitleInput.value.trim();
+  const actualSpent = parseFloat(orderActualSpentInput.value || '0');
 
   if (!orderDate) {
     createDayMessage.textContent = 'من فضلك اختاري التاريخ.';
@@ -178,7 +210,7 @@ async function createOrderDay() {
       'Content-Type': 'application/json',
       ...getAuthHeaders()
     },
-    body: JSON.stringify({ order_date: orderDate, title })
+    body: JSON.stringify({ order_date: orderDate, title,actual_spent_ils: actualSpent })
   });
 
   if (res.status === 401) {

@@ -213,6 +213,7 @@
       <h1>شي ستور – أيام الطلبات</h1>
       <div class="top-actions">
         <span id="currentUserLabel" class="user-label"></span>
+        <a href="stats.html" class="ghost-btn">الإحصائيات</a>
         <button id="logoutBtn" class="ghost-btn">تسجيل الخروج</button>
         <button id="themeToggle" class="ghost-btn">🌙 الوضع الداكن</button>
       </div>
@@ -228,7 +229,10 @@
         <div class="form-group">
           <label for="orderTitle">عنوان (اختياري)</label>
           <input type="text" id="orderTitle" placeholder="أضف طلب جديد" />
+          <label for="orderActualSpent">المبلغ المصروف (₪)</label>
+          <input type="number" id="orderActualSpent" step="0.01" value="0" />
         </div>
+        
         <div>
           <button class="primary" id="createDayBtn">إضافة</button>
         </div>
@@ -246,6 +250,7 @@
             <th>إجمالي القطع</th>
             <th>تاريخ الإنشاء</th>
             <th class="text-left">الإجمالي (₪)</th>
+            <th class="text-left">المبلغ المصروف (₪)</th>
             <th>الاستلام / الدفع</th>
             <th>فتح</th>
           </tr>

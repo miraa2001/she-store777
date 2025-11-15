@@ -91,6 +91,9 @@ const summaryUnpaidCountEl = document.getElementById('summaryUnpaidCount');
 const summaryUnpaidAmountEl = document.getElementById('summaryUnpaidAmount');
 const summaryNeedsChangeEl = document.getElementById('summaryNeedsChange');
 
+const actualSpentInput = document.getElementById('actualSpentInput');
+const saveActualSpentBtn = document.getElementById('saveActualSpentBtn');
+
 const searchInput = document.getElementById('searchInput');
 const filterNotPicked = document.getElementById('filterNotPicked');
 const filterNotPaid = document.getElementById('filterNotPaid');
@@ -112,9 +115,25 @@ const exportPdfBtn = document.getElementById('exportPdfBtn');
 let allEntries = [];
 let currentDay = null;
 
-function dateOnly(value) {
+function formatDateOnly(value) {
   if (!value) return '';
-  if (value.length >= 10) return value.slice(0, 10);
+
+  // If it's a string that looks like a date/time, try to parse it
+  try {
+    const d = new Date(value);
+    if (!isNaN(d.getTime())) {
+      // en-CA gives YYYY-MM-DD (nice for your UI)
+      return d.toLocaleDateString('en-CA');
+    }
+  } catch (e) {
+    // ignore and fall back
+  }
+
+  // Fallback: original behavior (just in case)
+  if (typeof value === 'string' && value.length >= 10) {
+    return value.slice(0, 10);
+  }
+
   return value;
 }
 
@@ -143,7 +162,7 @@ async function loadDay() {
     const day = await res.json();
     currentDay = day;
 
-    const dStr = dateOnly(day.order_date);
+    const dStr = formatDateOnly(day.order_date);
 
     dayTitleEl.textContent = day.title || `يوم رقم ${day.id}`;
     daySubtitleEl.textContent = `التاريخ: ${dStr}`;
@@ -152,9 +171,45 @@ async function loadDay() {
     summaryTotalEl.textContent = `₪${Number(day.total_ils || 0).toFixed(2)}`;
     summaryPickedEl.textContent = day.picked_up_count;
     summaryPaidEl.textContent = day.paid_count;
+    if (actualSpentInput) {
+      actualSpentInput.value = Number(day.actual_spent_ils || 0).toFixed(2);
+    }
   } catch (err) {
     console.error(err);
     entriesMessage.textContent = 'حدث خطأ أثناء تحميل تفاصيل اليوم.';
+  }
+}
+
+async function saveActualSpent() {
+  if (!actualSpentInput) return;
+  const value = parseFloat(actualSpentInput.value || '0');
+
+  try {
+    const res = await fetch(`${API_BASE}/order-days/${dayId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders()
+      },
+      body: JSON.stringify({ actual_spent_ils: value })
+    });
+
+    if (res.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      window.location.replace('login.html');
+      return;
+    }
+
+    if (!res.ok) {
+      throw new Error('Failed to update actual spent.');
+    }
+
+    // optionally reload day summary to refresh everything
+    await loadDay();
+  } catch (err) {
+    console.error(err);
+    entriesMessage.textContent = 'Failed to update actual spent.';
   }
 }
 
@@ -425,7 +480,7 @@ async function deleteEntry(entryId) {
 }
 
 function buildFilename(extension) {
-  const datePart = currentDay ? dateOnly(currentDay.order_date) : 'day';
+  const datePart = currentDay ? formatDateOnly(currentDay.order_date) : 'day';
   const titlePart = currentDay && currentDay.title
     ? currentDay.title.replace(/[^\w\-]+/g, '_')
     : `day_${dayId}`;
@@ -493,7 +548,7 @@ function exportPdf() {
     return;
   }
 
-  const dateStr = currentDay ? dateOnly(currentDay.order_date) : '';
+  const dateStr = currentDay ? formatDateOnly(currentDay.order_date) : '';
   const titleStr = currentDay && currentDay.title ? currentDay.title : `اليوم رقم ${dayId}`;
 
   // نحسب الإجمالي فقط للعرض في أسفل الجدول
@@ -662,6 +717,19 @@ if (exportCsvBtn) {
 if (exportPdfBtn) {
   exportPdfBtn.addEventListener('click', exportPdf);
 }
+if (saveActualSpentBtn) {
+  saveActualSpentBtn.addEventListener('click', saveActualSpent);
+}
+
+if (actualSpentInput) {
+  actualSpentInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveActualSpent();
+    }
+  });
+}
+
 if (dayId) {
   loadDay();
   loadEntries();
